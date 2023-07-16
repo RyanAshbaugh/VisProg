@@ -9,7 +9,7 @@ import io, tokenize
 from augly.utils.base_paths import EMOJI_DIR
 import augly.image as imaugs
 from PIL import Image,ImageDraw,ImageFont,ImageFilter
-from transformers import (ViltProcessor, ViltForQuestionAnswering, 
+from transformers import (ViltProcessor, ViltForQuestionAnswering,
     OwlViTProcessor, OwlViTForObjectDetection,
     MaskFormerFeatureExtractor, MaskFormerForInstanceSegmentation,
     CLIPProcessor, CLIPModel, AutoProcessor, BlipForQuestionAnswering)
@@ -17,6 +17,11 @@ from diffusers import StableDiffusionInpaintPipeline
 
 from .nms import nms
 from vis_utils import html_embed_image, html_colored_span, vis_masks
+
+if os.name == 'nt':
+    font_pat = "C:\\Windows\\Fonts\\DejaVuSans.ttf"
+else:
+    font_pat = "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf"
 
 
 def parse_step(step_str,partial=False):
@@ -57,7 +62,7 @@ def html_arg_name(content):
     arg_name = html_colored_span(content, 'darkorange')
     return f'<b>{arg_name}</b>'
 
-    
+
 class EvalInterpreter():
     step_name = 'EVAL'
 
@@ -71,7 +76,7 @@ class EvalInterpreter():
         step_input = eval(parse_result['args']['expr'])
         assert(step_name==self.step_name)
         return step_input, output_var
-    
+
     def html(self,eval_expression,step_input,step_output,output_var):
         eval_expression = eval_expression.replace('{','').replace('}','')
         step_name = html_step_name(self.step_name)
@@ -93,7 +98,7 @@ class EvalInterpreter():
                     prog_state[var_name] = f"'{var_value}'"
             else:
                 prog_state[var_name] = var_value
-        
+
         eval_expression = step_input
 
         if 'xor' in step_input:
@@ -129,7 +134,7 @@ class ResultInterpreter():
             output = html_embed_image(output,300)
         else:
             output = html_output(output)
-            
+
         return f"""<div>{step_name} -> {output_var} -> {output}</div>"""
 
     def execute(self,prog_step,inspect=False):
@@ -168,7 +173,7 @@ class VQAInterpreter():
         encoding = {k:v.to(self.device) for k,v in encoding.items()}
         with torch.no_grad():
             outputs = self.model.generate(**encoding)
-        
+
         return self.processor.decode(outputs[0], skip_special_tokens=True)
 
     def html(self,img,question,answer,output_var):
@@ -226,7 +231,7 @@ class LocInterpreter():
 
     def predict(self,img,obj_name):
         encoding = self.processor(
-            text=[[f'a photo of {obj_name}']], 
+            text=[[f'a photo of {obj_name}']],
             images=img,
             return_tensors='pt')
         encoding = {k:v.to(self.device) for k,v in encoding.items()}
@@ -235,7 +240,7 @@ class LocInterpreter():
             for k,v in outputs.items():
                 if v is not None:
                     outputs[k] = v.to('cpu') if isinstance(v, torch.Tensor) else v
-        
+
         target_sizes = torch.Tensor([img.size[::-1]])
         results = self.processor.post_process_object_detection(outputs=outputs,threshold=self.thresh,target_sizes=target_sizes)
         boxes, scores = results[0]["boxes"], results[0]["scores"]
@@ -258,7 +263,7 @@ class LocInterpreter():
         return selected_boxes
 
     def top_box(self,img):
-        w,h = img.size        
+        w,h = img.size
         return [0,0,w-1,int(h/2)]
 
     def bottom_box(self,img):
@@ -456,7 +461,7 @@ class CropRightOfInterpreter(CropInterpreter):
             w,h = img.size
             box = []
             right_box = [int(w/2),0,w-1,h-1]
-        
+
         out_img = img.crop(right_box)
 
         prog_step.state[output_var] = out_img
@@ -488,7 +493,7 @@ class CropLeftOfInterpreter(CropInterpreter):
             w,h = img.size
             box = []
             left_box = [0,0,int(w/2),h-1]
-        
+
         out_img = img.crop(left_box)
 
         prog_step.state[output_var] = out_img
@@ -520,7 +525,7 @@ class CropAboveInterpreter(CropInterpreter):
             w,h = img.size
             box = []
             above_box = [0,0,int(w/2),h-1]
-        
+
         out_img = img.crop(above_box)
 
         prog_step.state[output_var] = out_img
@@ -551,7 +556,7 @@ class CropBelowInterpreter(CropInterpreter):
             w,h = img.size
             box = []
             below_box = [0,0,int(w/2),h-1]
-        
+
         out_img = img.crop(below_box)
 
         prog_step.state[output_var] = out_img
@@ -689,7 +694,7 @@ class SelectInterpreter():
         inputs = {k:v.to(self.device) for k,v in inputs.items()}
         with torch.no_grad():
             scores = self.calculate_sim(inputs).cpu().numpy()
-            
+
         obj_ids = scores.argmax(0)
         return [objs[i] for i in obj_ids]
 
@@ -711,7 +716,7 @@ class SelectInterpreter():
         for cat in [q,f'{q}-merged',f'{q}-other-merged']:
             if cat in obj_cats:
                 return [obj for obj in objs if obj['category']==cat]
-        
+
         return None
 
     def execute(self,prog_step,inspect=False):
@@ -731,7 +736,7 @@ class SelectInterpreter():
                 matches = self.query_string_match(objs, q)
                 if matches is None:
                     continue
-                
+
                 select_objs += matches
 
         if query is not None and len(select_objs)==0:
@@ -911,7 +916,7 @@ class FaceDetInterpreter():
     def det_face(self,img):
         with torch.no_grad():
             faces = self.model.detect(np.array(img))
-        
+
         W,H = img.size
         objs = []
         for i,box in enumerate(faces):
@@ -1117,7 +1122,7 @@ class ClassifyInterpreter():
         inputs = {k:v.to(self.device) for k,v in inputs.items()}
         with torch.no_grad():
             sim = self.calculate_sim(inputs)
-            
+
 
         # if only one query then select the object with the highest score
         if len(query)==1:
@@ -1207,7 +1212,7 @@ class TagInterpreter():
         W,H = img.size
         img1 = img.copy()
         draw = ImageDraw.Draw(img1)
-        font = ImageFont.truetype('/usr/share/fonts/truetype/dejavu/DejaVuSansMono-Bold.ttf', 16)
+        font = ImageFont.truetype(font_path, 16)
         for i,obj in enumerate(objs):
             box = obj['box']
             draw.rectangle(box,outline='green',width=4)
