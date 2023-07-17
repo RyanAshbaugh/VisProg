@@ -24,4 +24,6 @@ git clone https://github.com/RyanAshbaugh/VisProg.git $repo_dir
 chdir $repo_dir
 conda env create -f environment.yaml -y
 
+conda activate visprog
+
 pip install python-magic-bin==0.4.14
