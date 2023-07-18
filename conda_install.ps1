@@ -19,7 +19,7 @@ $env:Path = "$env:Path;$install_dir;$install_dir\Scripts;$install_dir\Library\bi
 git clone https://github.com/RyanAshbaugh/VisProg.git $repo_dir
 
 chdir $repo_dir
-conda env create -f environment.yaml -y
+conda env create -f environment.yaml
 
 conda activate visprog
 
