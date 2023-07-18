@@ -21,7 +21,7 @@ from vis_utils import html_embed_image, html_colored_span, vis_masks
 if os.name == 'nt':
     font_path = "C:\\Windows\\Fonts\\DejaVuSans.ttf"
 else:
-    font_path = "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf"
+    font_path = "/usr/share/fonts/truetype/ubuntu/UbuntuMono-R.ttf"
 
 
 def parse_step(step_str,partial=False):
