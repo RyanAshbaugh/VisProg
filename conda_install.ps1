@@ -20,8 +20,4 @@ conda init powershell
 
 conda env create -f environment.yaml
 
-conda activate visprog
-
-pip install python-magic-bin
-
 Pause
