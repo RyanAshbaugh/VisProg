@@ -23,3 +23,5 @@ conda init
 conda activate visprog
 
 pip install python-magic-bin==0.4.14
+
+Pause
