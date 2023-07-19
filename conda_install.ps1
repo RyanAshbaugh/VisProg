@@ -18,7 +18,7 @@ $env:Path = "$env:Path;$install_dir;$install_dir\Scripts;$install_dir\Library\bi
 
 conda env create -f environment.yaml
 
-conda init
+conda init powershell
 
 conda activate visprog
 
