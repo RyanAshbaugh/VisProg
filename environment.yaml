@@ -6,13 +6,12 @@ dependencies:
   - ipykernel
   - Pillow
   - scipy
-  - pip:
-    - openai==0.23.0
-    - ipdb==0.13.9
-    - transformers==4.27.2
-    - pytest==7.1.3
-    - opencv-python==4.6.0.66
-    - face-detection==0.2.2
-    - augly==1.0.0
-    - diffusers==0.14.0
-    - accelerate==0.17.1
+  - openai
+  - ipdb
+  - transformers
+  - pytest
+  - opencv-python
+  - face-detection
+  - augly
+  - diffusers
+  - accelerate
