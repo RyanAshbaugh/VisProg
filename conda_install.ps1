@@ -16,6 +16,12 @@ Remove-Item -Path $outfile_path
 # Add the conda command to the current user's PATH environment variable
 $env:Path = "$env:Path;$install_dir;$install_dir\Scripts;$install_dir\Library\bin"
 
+conda init powershell
+
 conda env create -f environment.yaml
+
+conda activate visprog
+
+pip install python-magic-bin
 
 Pause

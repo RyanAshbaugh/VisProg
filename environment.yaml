@@ -16,4 +16,3 @@ dependencies:
     - augly==1.0.0
     - diffusers==0.14.0
     - accelerate==0.17.1
-    - python-magic-bin==0.4.14
