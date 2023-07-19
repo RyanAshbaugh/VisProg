@@ -16,6 +16,8 @@ Remove-Item -Path $outfile_path
 # Add the conda command to the current user's PATH environment variable
 $env:Path = "$env:Path;$install_dir;$install_dir\Scripts;$install_dir\Library\bin"
 
+git clone https://github.com/RyanAshbaugh/VisProg.git $repo_dir
+
 chdir $repo_dir
 conda env create -f environment.yaml
 
